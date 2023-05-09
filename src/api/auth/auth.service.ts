@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { User, UserDocument } from './entities/user.entity';
+import { SignUpDto } from './dto/signup.dto';
+import { SignInDto } from './dto/signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,33 +19,70 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(payload) {
+  /**
+   * Signup api
+   * @param payload signup payload
+   * @returns
+   */
+  async signUp(payload: SignUpDto): Promise<{ token: string }> {
     const { name, email, password } = payload;
     const hashedPass = await bcrypt.hash(password, 10);
 
+    // if user exist with the given email
+    const isUserExist = await this.userModel.findOne({ email });
+
+    if (isUserExist) {
+      throw new BadRequestException(
+        'This Email Already Used try with another email!',
+      );
+    }
+
+    // create new user
     const user = await this.userModel.create({
       name,
       email,
       password: hashedPass,
     });
-  }
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+
+    // make token with and return
+    const token = this.jwtService.sign({
+      id: user._id,
+      email: user?.email,
+    });
+
+    return { token };
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  /**
+   * Signin api
+   * @param payload - signin payload
+   * @returns
+   */
+  async signIn(payload: SignInDto): Promise<{ token: string }> {
+    const { email, password } = payload;
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    // check is user exist
+    const isUserExist = await this.userModel.findOne({ email });
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    // if user is not exist
+    if (!isUserExist) {
+      throw new UnauthorizedException('Email is not correct!');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    // check is password matched
+    const isMatchedPass = bcrypt.compare(password, isUserExist.password);
+
+    // if password is incorrect
+    if (!isMatchedPass) {
+      throw new UnauthorizedException('You entered wrong password!');
+    }
+
+    // make token and return
+    const token = this.jwtService.sign({
+      id: isUserExist._id,
+      email: isUserExist?.email,
+    });
+
+    return { token };
   }
 }
