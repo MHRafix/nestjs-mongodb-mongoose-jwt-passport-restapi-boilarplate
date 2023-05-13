@@ -26,7 +26,7 @@ export class ProductsController {
   }
 
   @Get()
-  @UseGuards(AuthGuard())
+  // @UseGuards(AuthGuard())
   findAll() {
     return this.productsService.findAll();
   }
