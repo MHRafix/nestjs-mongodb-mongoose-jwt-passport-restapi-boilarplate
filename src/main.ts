@@ -1,8 +1,8 @@
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,16 +14,18 @@ async function bootstrap() {
 
   // default postman support
   const config = new DocumentBuilder()
-    .setTitle('NESTJS SERVER BOILERPLATE')
-    .setDescription('The NESTJS SERVER BOILERPLATE API description')
+    .setTitle('Vocabulary Learning Application')
+    .setDescription('Vocabulary Learning Application API')
     .setVersion('1.0')
-    .addTag('NESTJS SERVER BOILERPLATE')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
 
-  await app.listen(8800, () => {
-    console.log('Server is running on port :--', 8800);
+  await app.listen(process.env.PORt, () => {
+    console.log(
+      'Vocabulary Learning Application server is running on port :--',
+      8800,
+    );
   });
 }
 bootstrap();

@@ -14,7 +14,7 @@ export default registerAs('app', () => ({
     | any other location as required by the application or its packages.
     |
     */
-  name: process.env.APP_NAME || 'SUROKKHA API',
+  name: process.env.APP_NAME || 'Vocabulary Learning Application API',
 
   /*
     |--------------------------------------------------------------------------
@@ -35,7 +35,9 @@ export default registerAs('app', () => ({
     | the framework needs to place the application's description in a notification
     | or any other location as required by the application or its packages.
     */
-  description: process.env.APP_DESC || 'Api documentation for Surokkha api',
+  description:
+    process.env.APP_DESC ||
+    'Api documentation for Vocabulary Learning Application API',
 
   /*
     |--------------------------------------------------------------------------
@@ -55,9 +57,9 @@ export default registerAs('app', () => ({
     |--------------------------------------------------------------------------
     | This value determines the port that the application will run on.
     | Set this in your ".env" file.
-    | If not set, the default value is 3000.
+    | If not set, the default value is 8800.
     */
-  port: process.env.PORT || 8000,
+  port: process.env.PORT || 8800,
 
   /*
     |--------------------------------------------------------------------------
@@ -84,7 +86,7 @@ export default registerAs('app', () => ({
     |--------------------------------------------------------------------------
     | This value determines the url that the application will run on.
     | Set this in your ".env" file.
-    | If not set, the default value is http://localhost:8000.
+    | If not set, the default value is http://localhost:8800.
     */
   url: process.env.BACKEND_DOMAIN || 'http://localhost:8800',
 

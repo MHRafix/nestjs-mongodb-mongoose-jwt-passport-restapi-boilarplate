@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -7,12 +7,12 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
+import { LoginDto } from './dto/login.dto';
+import { RegistrationDto } from './dto/registration.dto';
 import { User, UserDocument } from './entities/user.entity';
-import { SignUpDto } from './dto/signup.dto';
-import { SignInDto } from './dto/signin.dto';
 
 @Injectable()
-export class AuthService {
+export class AuthenticationService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
@@ -24,16 +24,16 @@ export class AuthService {
    * @param payload signup payload
    * @returns
    */
-  async signUp(payload: SignUpDto): Promise<{ token: string }> {
-    const { name, email, password } = payload;
+  async signUp(payload: RegistrationDto): Promise<{ token: string }> {
+    const { name, email, password, avatar, role } = payload;
     const hashedPass = await bcrypt.hash(password, 10);
 
     // if user exist with the given email
     const isUserExist = await this.userModel.findOne({ email });
 
-    if (isUserExist) {
-      throw new BadRequestException(
-        'This Email Already Used try with another email!',
+    if (isUserExist !== null) {
+      throw new ForbiddenException(
+        'This email already used try with another email!',
       );
     }
 
@@ -42,6 +42,8 @@ export class AuthService {
       name,
       email,
       password: hashedPass,
+      avatar,
+      role,
     });
 
     // make token with and return
@@ -58,7 +60,7 @@ export class AuthService {
    * @param payload - signin payload
    * @returns
    */
-  async signIn(payload: SignInDto): Promise<{ token: string }> {
+  async signIn(payload: LoginDto): Promise<{ token: string }> {
     const { email, password } = payload;
 
     // check is user exist
@@ -70,7 +72,7 @@ export class AuthService {
     }
 
     // check is password matched
-    const isMatchedPass = bcrypt.compare(password, isUserExist.password);
+    const isMatchedPass = await bcrypt.compare(password, isUserExist.password);
 
     // if password is incorrect
     if (!isMatchedPass) {
